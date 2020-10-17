@@ -10,6 +10,7 @@ const apis = require('./src/api_es/api')
 
 mongoose.set('useUnifiedTopology', true)
 mongoose.set('useNewUrlParser', true)
+mongoose.set('useFindAndModify', false);
 mongoose.connect(process.env.mongoose_URI,{ autoIndex: false })
 .then(() => console.log('DB connected'))
 .catch((err) => console.error('err', err))
@@ -17,10 +18,12 @@ mongoose.connect(process.env.mongoose_URI,{ autoIndex: false })
 const app = express()
 
 app.use(cors())
+app.use('/uploads/',express.static('uploads'))
 app.use(bodyParser.urlencoded({
   extended: true,
 }))
 app.use(bodyParser.json())
+
 
 app.use('/api', apis)
 
