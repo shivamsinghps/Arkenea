@@ -4,8 +4,9 @@ const UserData = require('../../models/userdata')
 const errorInit = require('../../util_functions/errorcrtr')
 const dicomParser = require('dicom-parser')
 const Rusha = require('rusha')
-// const encrypt = require('../../Utility/dcmencoder')
-// const decrypt = require('../../Utility/dcmdecoder')
+// var objCodec = require('object-encode');
+const encrypt = require('../../Utility/dcmencoder')
+const decrypt = require('../../Utility/dcmdecoder')
 
 function sha1(buffer, offset, length) {
   offset = offset || 0;
@@ -24,11 +25,13 @@ exports.user_form = async(req, res, next) => {
       next(errorInit('UserData Exists',409))
     }else{
       const dicomFileAsBuffer = fs.readFileSync(req.file.path);
+      encrypt(req.file.filename)
+      // decrypt(req.file.filename)
+      // console.log(req.file);
       try {
         var dataSet = dicomParser.parseDicom(dicomFileAsBuffer);
-        console.log(dataSet);
         
-      
+
       // print the patient's name
         var patientName = dataSet.string('x00100010');
         console.log('Patient Name = '+ patientName);

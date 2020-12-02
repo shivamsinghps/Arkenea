@@ -1,10 +1,18 @@
-module.exports = (o, salt) =>
-{
-    o = JSON.stringify(o)
-    // for(var i = 0, l = o.length; i < l; i++)
-    //     if(o[i] == '{')
-    //         o[i] = '}';
-    //     else if(o[i] == '}')
-    //         o[i] = '{';
-    return o;
-}
+const decrypt = require('./dcmdecoder')
+var encryptor = require('file-encryptor'),
+  //  const fs = require('fs'),
+   path = require('path');
+
+var encrypt = function(input) {
+    encryptor.encryptFile(
+      path.join(process.cwd(), `uploads/${input}`),
+      path.join(process.cwd(), `enc_file/${input}`),
+      process.env.SALT,
+      function(err) {
+        console.log(input + ' encryption complete.');
+        decrypt(input);
+      }
+    );
+  };
+
+module.exports = encrypt
