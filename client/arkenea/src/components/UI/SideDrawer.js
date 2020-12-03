@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
 const SideDrawer=(props)=> {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-  let primarylinks=['Users','DelUser','Update','ProfileSetup']
+  let primarylinks=['Users','DelUser','Update','ProfileSetup','UploadStudies']
   
   const toggleDrawer = () => {
     setOpen(prev =>!prev);

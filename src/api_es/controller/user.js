@@ -3,18 +3,8 @@ const path = require('path')
 const UserData = require('../../models/userdata')
 const errorInit = require('../../util_functions/errorcrtr')
 const dicomParser = require('dicom-parser')
-const Rusha = require('rusha')
-// var objCodec = require('object-encode');
-const encrypt = require('../../Utility/dcmencoder')
-const decrypt = require('../../Utility/dcmdecoder')
-
-function sha1(buffer, offset, length) {
-  offset = offset || 0;
-  length = length || buffer.length;
-  var subArray = dicomParser.sharedCopy(buffer, offset, length);
-  var rusha = new Rusha();
-  return rusha.digest(subArray);
-}
+const {uploadToCloudinary,deleteFromCloudinary} = require('../../util_functions/cloudinary')
+const {uploadToAws} = require('../../util_functions/aws_s3')
 
 exports.user_form = async(req, res, next) => {
  const data = {...req.body}
@@ -24,52 +14,24 @@ exports.user_form = async(req, res, next) => {
      
       next(errorInit('UserData Exists',409))
     }else{
-      const dicomFileAsBuffer = fs.readFileSync(req.file.path);
-      encrypt(req.file.filename)
-      // decrypt(req.file.filename)
-      // console.log(req.file);
-      try {
-        var dataSet = dicomParser.parseDicom(dicomFileAsBuffer);
-        
-
-      // print the patient's name
-        var patientName = dataSet.string('x00100010');
-        console.log('Patient Name = '+ patientName);
-      
-      // Get the pixel data element and calculate the SHA1 hash for its data
-        var pixelData = dataSet.elements.x7fe00010;
-        var pixelDataBuffer = dicomParser.sharedCopy(dicomFileAsBuffer, pixelData.dataOffset, pixelData.length);
-        console.log('Pixel Data length = ', pixelDataBuffer.length);
-        console.log("Pixel Data SHA1 hash = ", sha1(pixelDataBuffer));
-      
-      
-        if(pixelData.encapsulatedPixelData) {
-          var imageFrame = dicomParser.readEncapsulatedPixelData(dataSet, pixelData, 0);
-          console.log('Old Image Frame length = ', imageFrame.length);
-          console.log('Old Image Frame SHA1 hash = ', sha1(imageFrame));
-      
-          if(pixelData.basicOffsetTable.length) {
-            var imageFrame = dicomParser.readEncapsulatedImageFrame(dataSet, pixelData, 0);
-            console.log('Image Frame length = ', imageFrame.length);
-            console.log('Image Frame SHA1 hash = ', sha1(imageFrame));
-          } else {
-            var imageFrame = dicomParser.readEncapsulatedPixelDataFromFragments(dataSet, pixelData, 0, pixelData.fragments.length);
-            console.log('Image Frame length = ', imageFrame.length);
-            console.log('Image Frame SHA1 hash = ', sha1(imageFrame));
-          }
-        }
-      
+      const fieldsToUpdate = {image:'',imagePublicId:''};
+      if(req.file){
+      const file_process = req.file.mimetype.split('/')
+      if(file_process[0]==='image'){
+        const uploadImage = await uploadToCloudinary(req.file.buffer, "user");
+        if (uploadImage.secure_url) {
+        fieldsToUpdate.image = uploadImage.secure_url;
+        fieldsToUpdate.imagePublicId = uploadImage.public_id;
       }
-      catch(ex) {
-        console.log(ex);
       }
-
-      const newuserdata = new UserData({
+    }
+     const newuserdata = new UserData({
         firstName: data.firstName,
         LastName: data.LastName,
         email: data.email,
         Phone: data.Phone,
-        Profile:req.file.path
+        image:fieldsToUpdate.image,
+        imagePublicId:fieldsToUpdate.imagePublicId
       })
       newuserdata.save().then((user)=>{
         res.status(200).json({user:user,message:'User Data Saved'})
@@ -101,37 +63,69 @@ exports.user = (req, res, next) => {
   .catch((err)=> next(errorInit(`${err.message}database connection error`, 500)))
 };
 
-exports.user_delete = (req, res, next) => {
+exports.user_delete = async(req, res, next) => {
 
-  UserData.findOneAndRemove({email:req.params.id})
-  .then(user=>{
+  try{
+  const user = await UserData.findOneAndRemove({email:req.params.id})
+  const result = await deleteFromCloudinary(user.imagePublicId)
     res.json({
       data:user
-
     })
-  })
-  .catch((err)=> next(errorInit(`${err.message}database connection error`, 500)))
+  }catch(err){next(errorInit(`${err.message}database connection error`, 500))}
 };
 
-exports.user_update = (req, res, next) => {
-  let new_data = req.body
-  let data = {...new_data}
+exports.user_update = async(req, res, next) => { 
+  const fieldsToUpdate = {image:'',imagePublicId:''};
+      if(req.file){
+      const file_process = req.file.mimetype.split('/')
+      if(file_process[0]==='image'){
+        const uploadImage = await uploadToCloudinary(req.file.buffer, "user");
+        if (uploadImage.secure_url) {
+        fieldsToUpdate.image = uploadImage.secure_url;
+        fieldsToUpdate.imagePublicId = uploadImage.public_id;
+      }
+      }
+    }
+  let data = req.file?{...req.body, ...fieldsToUpdate}:{...req.body}
+  console.log(data);
   Object.keys(data).forEach(item=>{
     if(data[item]==="" || data[item]==="undefined")
     delete data[item]
   })
- if(req.file!==undefined)
-  data.Profile = req.file.path
-  
-  UserData.findOneAndUpdate(
+
+  try{
+  const user = await UserData.findOneAndUpdate(
     {email:req.params.id},
     {...data},
-    {new:true}
     )
-  .then(user=>{
+    const result = await deleteFromCloudinary(user.imagePublicId)
     res.json({
       data:user
     })
-  })
-  .catch((err)=> next(errorInit(`${err.message}database connection error`, 500)))
+  }catch(err){next(errorInit(`${err.message}database connection error`, 500))}
 };
+
+exports.user_Studies = async(req, res, next) => {
+  console.log('llko');
+  const data = {...req.body}
+
+ try{
+  const user = await UserData.findOne({email: data.email})
+     if(user){
+       console.log(user);
+      studies = await req.files.map(async (item)=>{
+        
+        const uploadFile = await uploadToAws(item.buffer)
+        if (!uploadFile.Location) {
+          throw new Error("Something went wrong while uploading File!");
+        }
+        const study = {studyfile:uploadFile.Location,studytag:uploadFile.ETag}
+        await UserData.findOneAndUpdate(
+          { email: data.email }, 
+          { $push: { studies: study } },
+      )
+      })
+     }   
+     res.sendStatus(200)
+    }catch(err){next(errorInit(`${err.message}database connection error`, 500))}
+ }

@@ -6,7 +6,12 @@ const user_dataSchema = new Schema({
   LastName: {type: String, required:true},
   email: {type: String, required:true, unique:true},
   Phone: {type: Number, required:true},
-  Profile: {type:String ,required:false} 
+  image: {type:String ,required:false},
+  imagePublicId: {type:String ,required:false},
+  studies :[{
+    studyfile:{type:String ,required:false},
+    studytag:{type:String ,required:false}
+  }]
 })
 
 module.exports = mongoose.model('UserData',user_dataSchema)

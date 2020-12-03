@@ -35,7 +35,7 @@ export default function UserDetails(props) {
           justify="center"
           alignItems="center" >
             <Grid item xs={12}>
-                <UserCard fname={data.firstName} lname={data.LastName} phone={data.Phone} email={data.email} profile={data.Profile} />
+                <UserCard fname={data.firstName} lname={data.LastName} phone={data.Phone} email={data.email} image={data.image} imagePublicId={data.imagePublicId} />
             </Grid>
         </Grid>
        </React.Fragment>
