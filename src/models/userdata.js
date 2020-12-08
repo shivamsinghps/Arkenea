@@ -2,10 +2,11 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const user_dataSchema = new Schema({
-  firstName: {type: String, required:true},
-  LastName: {type: String, required:true},
+  firstName: {type: String},
+  LastName: {type: String},
   email: {type: String, required:true, unique:true},
-  Phone: {type: Number, required:true},
+  password:{type: String, required:true},
+  Phone: {type: Number, required:false},
   image: {type:String ,required:false},
   imagePublicId: {type:String ,required:false},
   studies :[{

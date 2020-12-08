@@ -5,6 +5,8 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { useForm } from "react-hook-form";
 import axios from 'axios'
+import { useStore } from '../../store';
+import { CLEAR_AUTH_USER } from '../../store/auth';
 
 const useStyles = makeStyles((theme) => ({
     Input:{
@@ -21,21 +23,22 @@ const useStyles = makeStyles((theme) => ({
         },
   }))
 export default function DeleteUser() {
-
+    const [{auth},dispatch] = useStore();
     const classes = useStyles()
     const [data,setData] = React.useState(null)
     const { register, handleSubmit ,reset } = useForm();
 
     const onSubmit = (data) => {
-        setData(data.email);
+        setData(true);
       }
 
     React.useEffect(()=>{
       if(data!==null){
-        axios.delete(`http://localhost:9000/api/user/${data}`)
-        .then((response)=> {
-          reset()
-          response.data.data !== null ? alert("deleted") :alert("UserNOt exists")
+        axios.delete(`http://localhost:9000/api/user`,{headers: {
+          'Authorization': `Bearer ${auth.user.idToken}`
+        }}).then((response)=> {
+          dispatch({ type: CLEAR_AUTH_USER });
+          
         })
         .catch((error)=>{
           // handle error
@@ -55,10 +58,7 @@ export default function DeleteUser() {
           style={{padding:'20px'}}
           direction="row"
           justify="space-around"
-          alignItems="center" >
-            <Grid item xs={12}>
-            <input className={classes.Input} placeholder="Email Of The User To Be Deleted*" name="email" ref={register({ required: true ,pattern: /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/i })} />
-            </Grid>   
+          alignItems="center" > 
             <Grid item xs={12} style={{textAlign:'center'}}>                
             <Button className={classes.Submit} type="submit"variant="contained" color="secondary">
                 DELETE USER

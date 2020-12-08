@@ -7,7 +7,7 @@ import SideList from './List/List'
 const useStyles = makeStyles((theme) => ({
 
   list: {
-    width: '23vw',
+    width: '15vw',
     [theme.breakpoints.down('sm')]: {
       width:'58vw',
     },
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
     zIndex: 500,
     position:'fixed',
     top:20,
-    right:20,
+    left:20,
     display: 'inline',
   }
 }));
@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
 const SideDrawer=(props)=> {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
-  let primarylinks=['Users','DelUser','Update','ProfileSetup','UploadStudies']
+  let primarylinks=['Users','DelUser','Update','UploadStudies']
   
   const toggleDrawer = () => {
     setOpen(prev =>!prev);
@@ -57,7 +57,7 @@ const SideDrawer=(props)=> {
           <div className={classes.Menu}>
             <Button onClick={toggleDrawer}><Menu color='primary' /></Button>
           </div>
-          <Drawer transitionDuration={600}  classes={{ paper: classes.paper }} anchor='right'  open={open} onClose={toggleDrawer}>
+          <Drawer transitionDuration={600}  classes={{ paper: classes.paper }} anchor='left'  open={open} onClose={toggleDrawer}>
               {list}
           </Drawer>
         </React.Fragment>

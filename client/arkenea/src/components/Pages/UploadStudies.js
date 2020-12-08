@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import { useForm } from "react-hook-form";
 import {DropzoneArea} from 'material-ui-dropzone'
 import axios from 'axios'
+import { useStore } from '../../store';
 
 const useStyles = makeStyles((theme) => ({
     Input:{
@@ -22,34 +23,30 @@ const useStyles = makeStyles((theme) => ({
       }
   }))
 export default function UploadStudies () {
-
+    const [{auth}] = useStore()
     const classes = useStyles()
     const [data,setData] = React.useState(null)
-    const [email,setEmail] = React.useState(null)
     const [img,setImg] = React.useState()
     const { register, handleSubmit ,reset} = useForm();
     const form_data =  new FormData()
 
     const onSubmit = async (data) => {
-        form_data.append("email",data.email)
-        console.log(img);
         img.map(item=>{
           form_data.append("Userimage",item)
         })
-        setEmail(data.email)
         setData(form_data)
       }
 
     React.useEffect(()=>{
-      if(data!==null && email!==null){
-        axios({method:'post',url:`http://localhost:9000/api/upload_studies/${email}`,data:data,headers: {'Content-Type': 'multipart/form-data' }})
+      if(data!==null){
+        axios({method:'post',url:`http://localhost:9000/api/upload_studies/`,data:data,headers: {'Content-Type': 'multipart/form-data','Authorization': `Bearer ${auth.user.idToken}`}})
         .then(res=>{
           alert('Uploaded')
           reset() 
         }).catch(err=>console.log(err))
       }
 
-    },[data,email])
+    },[data])
 
     return (
         <React.Fragment>
@@ -63,9 +60,6 @@ export default function UploadStudies () {
           direction="row"
           justify="space-around"
           alignItems="center" >
-            <Grid item xs={12}>
-            <input className={classes.Input} placeholder="Email Of The User whose study is to be uploaded" name="email" ref={register({ required: true ,pattern: /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/i })} />
-            </Grid>
             <Grid item xs={12}>
             <label>Studies</label>
             <DropzoneArea

@@ -6,6 +6,7 @@ import Button from '@material-ui/core/Button';
 import { useForm } from "react-hook-form";
 import {DropzoneArea} from 'material-ui-dropzone'
 import axios from 'axios'
+import { useStore } from '../../store';
 
 const useStyles = makeStyles((theme) => ({
     Input:{
@@ -22,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
       }
   }))
 export default function UpdateUser () {
-
+    const [{auth}] = useStore()
     const classes = useStyles()
     const [data,setData] = React.useState(null)
     const [email,setEmail] = React.useState(null)
@@ -31,7 +32,6 @@ export default function UpdateUser () {
     const form_data =  new FormData()
 
     const onSubmit = async (data) => {
-        form_data.append("email",data.email)
         form_data.append("Phone",data.Phone)
         form_data.append("firstName",data.firstName)
         form_data.append("LastName",data.LastName)
@@ -42,7 +42,7 @@ export default function UpdateUser () {
 
     React.useEffect(()=>{
       if(data!==null && email!==null){
-        axios({method:'patch',url:`http://localhost:9000/api/user/${email}`,data:data,headers: {'Content-Type': 'multipart/form-data' }})
+        axios({method:'patch',url:`http://localhost:9000/api/user`,data:data,headers: {'Content-Type': 'multipart/form-data','Authorization': `Bearer ${auth.user.idToken}`}})
         .then(res=>{
           alert('Updated')
           reset() 
@@ -63,9 +63,6 @@ export default function UpdateUser () {
           direction="row"
           justify="space-around"
           alignItems="center" >
-            <Grid item xs={12}>
-            <input className={classes.Input} placeholder="Email Of The User To Be Updated*" name="email" ref={register({ required: true ,pattern: /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/i })} />
-            </Grid>
             <Grid item xs={12}>
             <label>ProfileImage</label>
             <DropzoneArea
