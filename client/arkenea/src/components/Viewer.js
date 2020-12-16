@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import CornerstoneViewport from 'react-cornerstone-viewport'
+import img from '../assets/shivam'
 
 // https://github.com/conorhastings/react-syntax-highlighter
 
@@ -10,17 +11,17 @@ class ExamplePageBasic extends Component {
       {
         name: 'Wwwc',
         mode: 'active',
-        modeOptions: { mouseButtonMask: 2 },
+        modeOptions: { mouseButtonMask: 1 },
       },
       {
         name: 'Zoom',
         mode: 'active',
-        modeOptions: { mouseButtonMask: 4  },
+        modeOptions: { mouseButtonMask: 2 },
       },
       {
         name: 'Pan',
         mode: 'active',
-        modeOptions: { mouseButtonMask: 1},
+        modeOptions: { mouseButtonMask: 4},
       },
       // Scroll
       { name: 'StackScrollMouseWheel', mode: 'active' },
@@ -30,7 +31,6 @@ class ExamplePageBasic extends Component {
       { name: 'StackScrollMultiTouch', mode: 'active' },
     ],
     imageIds: [
-      'dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.11.dcm',
       'dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.12.dcm',
     ],
   };

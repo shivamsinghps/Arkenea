@@ -19,6 +19,8 @@ router.patch('/user',checkAuth,upload.single('Userimage'),UserController.user_up
 
 router.post('/upload_studies',checkAuth,upload.array('Userimage',10),UserController.user_Studies)
 
+router.post('/share_studies',checkAuth,UserController.user_Share_Studies)
+
 router.delete('/user',checkAuth,UserController.user_delete)
 
 

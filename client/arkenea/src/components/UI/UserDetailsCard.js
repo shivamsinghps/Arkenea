@@ -20,7 +20,10 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.getContrastText(deepOrange[500]),
     backgroundColor: deepOrange[500],
     height:'30vh',
-    width:'15vw'
+    width:'15vw',
+    [theme.breakpoints.down('sm')]: {
+      width:'50vw'
+    },
   },
 }));
 

@@ -14,7 +14,7 @@ AWS.config.update({
   const s3 = new AWS.S3();
   
   async function uploadReadableStream(stream) {
-    var params = { Bucket: process.env.AWS_BUCKET, ACL: 'public-read', Key: `${uuid()}.DCM`, Body: stream };
+    var params = { Bucket: process.env.AWS_BUCKET, ACL: 'public-read', Key: `${uuid()}.dcm`, Body: stream };
     return s3.upload(params).promise();
   }
   

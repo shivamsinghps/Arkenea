@@ -22,14 +22,18 @@ export default function UserDetails(props) {
     const classes = useStyles()
     const [loading,setLoading] = React.useState(true)
     const [data,setData] = React.useState(null)
+    const [shareddata,setSharedData] = React.useState([])
     React.useEffect(()=>{
       console.log(auth);
         axios.get(`http://localhost:9000/api/user`,{headers: {
           'Authorization': `Bearer ${auth.user.idToken}`
         }})
       .then((response)=> {
+        console.log(response)
         // handle success
+        // console.log(response.data.data.studies[0].studyfile);
         setData(response.data.data)
+        setSharedData(response.data.shared_data)
         setLoading(false)
       })
       .catch((error)=>{
@@ -38,6 +42,9 @@ export default function UserDetails(props) {
       })
 
     },[])
+
+    // console.log(data.image);
+    console.log(shareddata,"this is it");
 
     if(!loading && data !== null){
     return (
@@ -58,10 +65,18 @@ export default function UserDetails(props) {
              User Studies
              </Typography>
                 {data.studies.map(study=>(
-                  <Study study_id={study._id} key={study._id}/>
+                  <Study study_id={study._id} key={study._id} studyfile={study.studyfile}/>
                 ))}
             </Grid> 
-
+           {shareddata!==null && shareddata.length!==0 ?( <Grid item xs={10} sm={8} md={6} >
+            <Typography variant="h5" gutterBottom style={{justifyContent:'center',textAlign:'left',fontFamily:'Roboto',marginTop:50}}>
+             Shared Studies
+             </Typography>
+                {shareddata.map(study=>(
+                  <Study study_id={study._id} key={study._id} studyfile={study.studyfile}/>
+                ))}
+            </Grid> 
+            ):null}
         </Grid>
        </React.Fragment>
     )}

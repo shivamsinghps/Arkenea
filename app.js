@@ -18,6 +18,7 @@ mongoose.connect(process.env.mongoose_URI,{ autoIndex: false })
 const app = express()
 
 app.use(cors())
+
 app.use('/uploads/',express.static('uploads'))
 app.use(bodyParser.urlencoded({
   extended: true,
